@@ -9,9 +9,11 @@ keywords = [
 ]
 categories = ["no-std"]
 license = "MIT OR Apache-2.0"
+documentation = "https://docs.rs/bevy_bundletree/latest/bevy_bundletree"
 repository = "https://github.com/Katsutoshii/bevy_bundletree"
 readme = "README.md"
 homepage = "https://github.com/Katsutoshii/bevy_bundletree"
+description = "Derive macros for `bevy_bundletree`."
 
 [lib]
 proc-macro = true
