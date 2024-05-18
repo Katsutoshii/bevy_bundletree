@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "bevy_bundletree"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Josiah Putman <joshikatsu@gmail.com>"]
 description = "Spawn trees of bundles in the Bevy game engine."
 documentation = "https://docs.rs/bevy_bundletree/latest/bevy_bundletree"
