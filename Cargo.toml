@@ -9,9 +9,7 @@ documentation = "https://docs.rs/bevy_bundletree/latest/bevy_bundletree"
 
 [dependencies]
 bevy = {version = "0.13"}
-bevy_bundletree_core = { path = 'crates/bevy_bundletree_core'}
-bevy_bundletree_derive = { path = 'crates/bevy_bundletree_derive'}
+bevy_bundletree_derive = { path = 'bevy_bundletree_derive'}
 
 [[example]]
-name = "basic"
-required-features = [ ]
+name = "ui"
