@@ -1,0 +1,17 @@
+[package]
+edition = "2021"
+name = "bevy_bundletree"
+version = "0.1.0"
+authors = ["Josiah Putman <joshikatsu@gmail.com>"]
+description = "Provides a derive proc macro for bevy::bundletree::BundleEnum"
+documentation = "https://docs.rs/bevy_bundletree/latest/bevy_bundletree"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = {version = "0.13"}
+bevy_bundletree_core = { path = 'crates/bevy_bundletree_core'}
+bevy_bundletree_derive = { path = 'crates/bevy_bundletree_derive'}
+
+[[example]]
+name = "basic"
+required-features = [ ]
