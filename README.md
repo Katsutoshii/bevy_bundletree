@@ -1,5 +1,9 @@
 # `bevy_bundletree`
 
+[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/Katsutoshii/bevy_bundletree#license)
+[![Crates.io](https://img.shields.io/crates/v/bevy_bundletree.svg)](https://crates.io/crates/bevy_bundletree)
+[![Docs](https://docs.rs/bevy_bundletree/badge.svg)](https://docs.rs/bevy_bundletree/latest/bevy_bundletree/)
+
 Spawn trees of bundles in Bevy to make UI Code more ergonomic.
 
 ## Usage
