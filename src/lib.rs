@@ -1,4 +1,4 @@
-// Allows spawning enum bundles as trees.
+/// Crate to allow spawning enum bundles as trees.
 use bevy::{
     ecs::{
         bundle::Bundle,
@@ -10,6 +10,24 @@ use bevy::{
 
 /// Spawn a tree of bundles.
 /// We don't use the Bundle trait directly because that trait doesn't support enums.
+///
+/// ```
+/// use bevy::prelude::*;
+/// use bevy_bundletree::*;
+///
+/// #[derive(IntoBundleTree, BundleEnum)]
+/// enum UiNode {
+///     Node(NodeBundle),
+///     Text(TextBundle),
+///     Button(ButtonBundle),
+/// }
+/// fn setup(mut commands: Commands) {
+///     let tree: BundleTree<UiNode> = NodeBundle::default().with_children([
+///         TextBundle::default().into_tree(),
+///         ButtonBundle::default().into_tree()]);
+///     commands.spawn_tree(tree);
+/// }
+/// ```
 #[derive(Clone)]
 pub struct BundleTree<B: BundleEnum> {
     pub bundle: B,
@@ -27,6 +45,8 @@ impl<B: BundleEnum> BundleTree<B> {
         self
     }
 }
+
+/// Make it easy to convert bundles into their corresponding trees.
 pub trait IntoBundleTree<B: BundleEnum>: Bundle + Into<B> {
     fn into_tree(self) -> BundleTree<B> {
         BundleTree::new(self)
@@ -36,6 +56,7 @@ pub trait IntoBundleTree<B: BundleEnum>: Bundle + Into<B> {
     }
 }
 
+/// Support calling bundle.into() to get a `BundleTree`.
 impl<B: BundleEnum> From<B> for BundleTree<B> {
     fn from(bundle: B) -> Self {
         BundleTree::new(bundle)
@@ -76,3 +97,39 @@ pub trait MakeBundleTree<B: BundleEnum, Context> {
 
 // Re-export derive macros.
 pub use bevy_bundletree_derive::{BundleEnum, IntoBundleTree};
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+    use bevy::prelude::*;
+
+    // Make sure that all entities in the tree are spawned.
+    #[test]
+    fn basic_test() {
+        #[allow(clippy::large_enum_variant)]
+        #[derive(IntoBundleTree, BundleEnum)]
+        enum UiNode {
+            Node(NodeBundle),
+            Text(TextBundle),
+            Button(ButtonBundle),
+        }
+
+        fn setup(mut commands: Commands) {
+            let tree: BundleTree<UiNode> = NodeBundle::default().with_children([
+                TextBundle::default().into_tree(),
+                ButtonBundle::default().into_tree(),
+            ]);
+            commands.spawn_tree(tree);
+        }
+
+        // Setup app
+        let mut app = App::new();
+        app.add_systems(Startup, setup);
+
+        // Run systems
+        app.update();
+
+        // Check enemy was despawned
+        assert!(app.world.entities().total_count() == 3);
+    }
+}
