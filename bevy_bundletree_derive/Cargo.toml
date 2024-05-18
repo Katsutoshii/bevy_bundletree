@@ -3,14 +3,15 @@
 edition = "2021"
 name = "bevy_bundletree_derive"
 version = "0.1.1"
-readme = "README.md"
 keywords = [
     "bevy",
     "derive",
 ]
 categories = ["no-std"]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/Katsutoshii/bevy_bundletree"
+readme = "README.md"
+homepage = "https://github.com/Katsutoshii/bevy_bundletree"
 
 [lib]
 proc-macro = true
