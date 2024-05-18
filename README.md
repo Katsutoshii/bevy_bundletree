@@ -6,7 +6,7 @@ Spawn trees of bundles in Bevy to make UI Code more ergonomic.
 
 Define an enum to represent all possible bundles in your tree and derive `IntoBundleTree` and `BundleEnum`.
 
-```rs
+```rust
 use bevy::prelude::*;
 use bevy_bundletree::*;
 
