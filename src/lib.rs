@@ -130,6 +130,6 @@ mod test {
         app.update();
 
         // Check enemy was despawned
-        assert!(app.world.entities().total_count() == 3);
+        assert!(app.world().entities().total_count() == 3);
     }
 }
