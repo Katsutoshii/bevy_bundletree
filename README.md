@@ -27,3 +27,11 @@ fn setup(mut commands: Commands) {
     commands.spawn_tree(tree);
 }
 ```
+
+
+## Bevy support table
+
+| bevy | bevy_bundletree |
+| ---- | --------------- |
+| 0.14 | 0.2.1           |   
+| 0.13 | 0.1.1           |   
