@@ -17,14 +17,14 @@ use bevy::{
 ///
 /// #[derive(IntoBundleTree, BundleEnum)]
 /// enum UiNode {
-///     Node(NodeBundle),
-///     Text(TextBundle),
-///     Button(ButtonBundle),
+///     Node(Node),
+///     Text(Text),
+///     Button(Button),
 /// }
 /// fn setup(mut commands: Commands) {
-///     let tree: BundleTree<UiNode> = NodeBundle::default().with_children([
-///         TextBundle::default().into_tree(),
-///         ButtonBundle::default().into_tree()]);
+///     let tree: BundleTree<UiNode> = Node::default().with_children([
+///         Text::default().into_tree(),
+///         Button.into_tree()]);
 ///     commands.spawn_tree(tree);
 /// }
 /// ```
@@ -41,7 +41,7 @@ impl<B: BundleEnum> BundleTree<B> {
         }
     }
     pub fn with_children(mut self, children: impl IntoIterator<Item = BundleTree<B>>) -> Self {
-        self.children = children.into_iter().collect();
+        self.children.extend(children);
         self
     }
 }
@@ -84,7 +84,7 @@ impl BundleTreeSpawner for Commands<'_, '_> {
         }
 
         let mut e = bundle.spawn(self);
-        e.push_children(&child_ids);
+        e.add_children(&child_ids);
         e
     }
 }
@@ -109,16 +109,14 @@ mod test {
         #[allow(clippy::large_enum_variant)]
         #[derive(IntoBundleTree, BundleEnum)]
         enum UiNode {
-            Node(NodeBundle),
-            Text(TextBundle),
-            Button(ButtonBundle),
+            Node(Node),
+            Text(Text),
+            Button(Button),
         }
 
         fn setup(mut commands: Commands) {
-            let tree: BundleTree<UiNode> = NodeBundle::default().with_children([
-                TextBundle::default().into_tree(),
-                ButtonBundle::default().into_tree(),
-            ]);
+            let tree: BundleTree<UiNode> =
+                Node::default().with_children([Text::default().into_tree(), Button.into_tree()]);
             commands.spawn_tree(tree);
         }
 
@@ -129,7 +127,7 @@ mod test {
         // Run systems
         app.update();
 
-        // Check enemy was despawned
+        // Check entities spawned
         assert!(app.world().entities().total_count() == 3);
     }
 }
