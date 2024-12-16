@@ -10,7 +10,7 @@ use bevy::{
     ui::widget::NodeImageMode,
     winit::WinitSettings,
 };
-use bevy_bundletree::*;
+use bevy_bundletree::{ChildBundle, ChildBundles};
 use std::f32::consts::PI;
 
 fn main() {
@@ -30,22 +30,6 @@ fn main() {
     app.run();
 }
 
-/// Define an enum to represent all possible node types in the UI tree.
-// #[allow(clippy::large_enum_variant)]
-#[derive(IntoBundleTree, BundleEnum)]
-enum UiNode {
-    Node(Node),
-    PickingNode((Node, PickingBehavior)),
-    BackgroundNode((Node, BackgroundColor)),
-    BorderNode((Node, BorderColor, BackgroundColor)),
-    BoxShadowNode((Node, BackgroundColor, BoxShadow)),
-    Text((Text, TextFont, Label)),
-    AccessibileText((Text, TextFont, Label, AccessibilityNode, PickingBehavior)),
-    ImageNode((ImageNode, Transform, BorderRadius, Outline)),
-    CustomImageNode((ImageNode, Node)),
-    TextNode((Node, Text)),
-}
-
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Camera
     commands.spawn((Camera2d, IsDefaultUiCamera, UiBoxShadowSamples(6)));
@@ -58,7 +42,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     };
 
-    let tree: BundleTree<UiNode> = (
+    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+    let icon = asset_server.load("branding/icon.png");
+    let light_logo = asset_server.load("branding/bevy_logo_light.png");
+    let root = (
         Node {
             width: Val::Percent(100.0),
             height: Val::Percent(100.0),
@@ -66,31 +53,29 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         PickingBehavior::IGNORE,
-    )
-        .with_children([
-            // left vertical fill (border)
-            (
+        // Left vertical fill
+        ChildBundle((
+            Node {
+                width: Val::Px(200.),
+                border: UiRect::all(Val::Px(2.)),
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.65, 0.65, 0.65)),
+            // Flex column
+            ChildBundle((
                 Node {
-                    width: Val::Px(200.),
-                    border: UiRect::all(Val::Px(2.)),
+                    width: Val::Percent(100.),
+                    flex_direction: FlexDirection::Column,
+                    padding: UiRect::all(Val::Px(5.)),
+                    row_gap: Val::Px(5.),
                     ..default()
                 },
-                BackgroundColor(Color::srgb(0.65, 0.65, 0.65)),
-            )
-                .with_children([(
-                    Node {
-                        width: Val::Percent(100.),
-                        flex_direction: FlexDirection::Column,
-                        padding: UiRect::all(Val::Px(5.)),
-                        row_gap: Val::Px(5.),
-                        ..default()
-                    },
-                    BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
-                )
-                    .with_children([(
+                BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
+                ChildBundles([
+                    (
                         Text::new("Text Example"),
                         TextFont {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font: font.clone(),
                             font_size: 25.0,
                             ..default()
                         },
@@ -98,88 +83,84 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         // not button/list item text, this is necessary
                         // for accessibility to treat the text accordingly.
                         Label,
-                    )
-                        .into_tree()])
-                    .with_children(if cfg!(feature = "bevy_dev_tools") {
-                        [(
+                    ),
+                    if cfg!(feature = "bevy_dev_tools") {
+                        (
                             Text::new("Press Space to enable debug outlines."),
                             TextFont {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font: font.clone(),
                                 ..default()
                             },
                             Label,
                         )
-                            .into_tree()]
                     } else {
-                        [(
+                        (
                             Text::new("Try enabling feature \"bevy_dev_tools\"."),
                             TextFont {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font: font.clone(),
                                 ..default()
                             },
                             Label,
                         )
-                            .into_tree()]
-                    })]),
-            // right vertical fill
-            (Node {
+                    },
+                ]),
+            )),
+        )),
+        // Right vertical fill
+        ChildBundle((
+            Node {
                 flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 width: Val::Px(200.),
                 ..default()
-            }
-            .with_children([
-                // Title
-                (
-                    Text::new("Scrolling list"),
-                    TextFont {
-                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: 21.,
-                        ..default()
-                    },
-                    Label,
-                )
-                    .into_tree(),
-                // Scrolling list
-                (
-                    Node {
-                        flex_direction: FlexDirection::Column,
-                        align_self: AlignSelf::Stretch,
-                        height: Val::Percent(50.),
-                        overflow: Overflow::scroll_y(),
-                        ..default()
-                    },
-                    BackgroundColor(Color::srgb(0.10, 0.10, 0.10)),
-                )
-                    .with_children(
-                        (0..25)
-                            .map(|i| {
-                                (
-                                    Text(format!("Item {i}")),
-                                    TextFont {
-                                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                        ..default()
-                                    },
-                                    Label,
-                                    AccessibilityNode(Accessible::new(Role::ListItem)),
-                                    PickingBehavior {
-                                        should_block_lower: false,
-                                        ..default()
-                                    },
-                                )
-                                    .into_tree()
-                            })
-                            .collect::<Vec<_>>(),
-                    ),
-            ])),
+            },
+            ChildBundle((
+                Text::new("Scrolling list"),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 21.,
+                    ..default()
+                },
+                Label,
+            )),
+            ChildBundle((
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    align_self: AlignSelf::Stretch,
+                    height: Val::Percent(50.),
+                    overflow: Overflow::scroll_y(),
+                    ..default()
+                },
+                BackgroundColor(Color::srgb(0.10, 0.10, 0.10)),
+                ChildBundles((0..25).map({
+                    let font = font.clone();
+                    move |i| {
+                        (
+                            Text(format!("Item {i}")),
+                            TextFont {
+                                font: font.clone(),
+                                ..default()
+                            },
+                            Label,
+                            AccessibilityNode(Accessible::new(Role::ListItem)),
+                            PickingBehavior {
+                                should_block_lower: false,
+                                ..default()
+                            },
+                        )
+                    }
+                })),
+            )),
+        )),
+        ChildBundle((
             Node {
                 left: Val::Px(210.),
                 bottom: Val::Px(10.),
                 position_type: PositionType::Absolute,
                 ..default()
-            }
-            .with_children([(
+            },
+            ChildBundle((
                 Node {
                     width: Val::Px(200.0),
                     height: Val::Px(200.0),
@@ -190,9 +171,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 BorderColor(LIME.into()),
                 BackgroundColor(Color::srgb(0.8, 0.8, 1.)),
-            )
-                .with_children([(
-                    ImageNode::new(asset_server.load("branding/bevy_logo_light.png")),
+                ChildBundle((
+                    ImageNode::new(light_logo),
                     // Uses the transform to rotate the logo image by 45 degrees
                     Transform::from_rotation(Quat::from_rotation_z(0.25 * PI)),
                     BorderRadius::all(Val::Px(10.)),
@@ -201,97 +181,95 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         offset: Val::Px(4.),
                         color: DARK_GRAY.into(),
                     },
-                )
-                    .into_tree()])]),
-            // render order test: reddest in the back, whitest in the front (flex center)
-            (
+                )),
+            )),
+        )),
+        // Render order test
+        ChildBundle((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                position_type: PositionType::Absolute,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            PickingBehavior::IGNORE,
+            ChildBundle((
                 Node {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    position_type: PositionType::Absolute,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
+                    width: Val::Px(100.0),
+                    height: Val::Px(100.0),
                     ..default()
                 },
-                PickingBehavior::IGNORE,
-            )
-                .with_children([(
-                    Node {
-                        width: Val::Px(100.0),
-                        height: Val::Px(100.0),
-                        ..default()
-                    },
-                    BackgroundColor(Color::srgb(1.0, 0.0, 0.)),
-                    shadow,
-                )
-                    .with_children([
-                        (
-                            Node {
-                                // Take the size of the parent node.
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
-                                position_type: PositionType::Absolute,
-                                left: Val::Px(20.),
-                                bottom: Val::Px(20.),
-                                ..default()
-                            },
-                            BackgroundColor(Color::srgb(1.0, 0.3, 0.3)),
-                            shadow,
-                        )
-                            .into_tree(),
-                        (
-                            Node {
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
-                                position_type: PositionType::Absolute,
-                                left: Val::Px(40.),
-                                bottom: Val::Px(40.),
-                                ..default()
-                            },
-                            BackgroundColor(Color::srgb(1.0, 0.5, 0.5)),
-                            shadow,
-                        )
-                            .into_tree(),
-                        (
-                            Node {
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
-                                position_type: PositionType::Absolute,
-                                left: Val::Px(60.),
-                                bottom: Val::Px(60.),
-                                ..default()
-                            },
-                            BackgroundColor(Color::srgb(0.0, 0.7, 0.7)),
-                            shadow,
-                        )
-                            .into_tree(),
-                        // alpha test
-                        (
-                            Node {
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
-                                position_type: PositionType::Absolute,
-                                left: Val::Px(80.),
-                                bottom: Val::Px(80.),
-                                ..default()
-                            },
-                            BackgroundColor(Color::srgba(1.0, 0.9, 0.9, 0.4)),
-                            BoxShadow {
-                                color: Color::BLACK.with_alpha(0.3),
-                                ..shadow
-                            },
-                        )
-                            .into_tree(),
-                    ])]),
-            // bevy logo (flex center)
+                BackgroundColor(Color::srgb(1.0, 0.0, 0.)),
+                shadow,
+                ChildBundles([
+                    (
+                        Node {
+                            // Take the size of the parent node.
+                            width: Val::Percent(100.0),
+                            height: Val::Percent(100.0),
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(20.),
+                            bottom: Val::Px(20.),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb(1.0, 0.3, 0.3)),
+                        shadow,
+                    ),
+                    (
+                        Node {
+                            width: Val::Percent(100.0),
+                            height: Val::Percent(100.0),
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(40.),
+                            bottom: Val::Px(40.),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb(1.0, 0.5, 0.5)),
+                        shadow,
+                    ),
+                    (
+                        Node {
+                            width: Val::Percent(100.0),
+                            height: Val::Percent(100.0),
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(60.),
+                            bottom: Val::Px(60.),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb(0.0, 0.7, 0.7)),
+                        shadow,
+                    ),
+                    // alpha test
+                    (
+                        Node {
+                            width: Val::Percent(100.0),
+                            height: Val::Percent(100.0),
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(80.),
+                            bottom: Val::Px(80.),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgba(1.0, 0.9, 0.9, 0.4)),
+                        BoxShadow {
+                            color: Color::BLACK.with_alpha(0.3),
+                            ..shadow
+                        },
+                    ),
+                ]),
+            )),
+        )),
+        // Bevy logo
+        ChildBundle((
             Node {
                 width: Val::Percent(100.0),
                 position_type: PositionType::Absolute,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::FlexStart,
                 ..default()
-            }
-            .with_children([(
+            },
+            ChildBundle((
                 ImageNode::new(asset_server.load("branding/bevy_logo_dark_big.png"))
                     .with_mode(NodeImageMode::Stretch),
                 Node {
@@ -300,16 +278,17 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     margin: UiRect::top(Val::VMin(5.)),
                     ..default()
                 },
-            )
-                .with_children([(
+                ChildBundle((
                     Node {
                         display: Display::None,
                         ..default()
                     },
                     Text::new("Bevy logo"),
-                )
-                    .into_tree()])]),
-            // four bevy icons demonstrating image flipping
+                )),
+            )),
+        )),
+        // Image flipping
+        ChildBundle((
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
@@ -319,14 +298,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 column_gap: Val::Px(10.),
                 padding: UiRect::all(Val::Px(10.)),
                 ..default()
-            }
-            .with_children(
+            },
+            ChildBundles(
                 [(false, false), (false, true), (true, true), (true, false)]
                     .iter()
-                    .map(|&(flip_x, flip_y)| {
+                    .map(move |&(flip_x, flip_y)| {
                         (
                             ImageNode {
-                                image: asset_server.load("branding/icon.png"),
+                                image: icon.clone(),
                                 flip_x,
                                 flip_y,
                                 ..default()
@@ -337,13 +316,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 ..default()
                             },
                         )
-                            .into_tree()
-                    })
-                    .collect::<Vec<_>>(),
+                    }),
             ),
-        ]);
-
-    commands.spawn_tree(tree);
+        )),
+    );
+    commands.spawn(root);
 }
 
 #[cfg(feature = "bevy_dev_tools")]

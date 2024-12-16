@@ -6,25 +6,27 @@
 
 Spawn trees of bundles in Bevy to make UI Code more ergonomic.
 
+The current version heavily based on https://github.com/Leafwing-Studios/i-cant-believe-its-not-bsn.
+
 ## Usage
 
-Define an enum to represent all possible bundles in your tree and derive `IntoBundleTree` and `BundleEnum`.
-
 ```rust
-use bevy::prelude::*;
-use bevy_bundletree::*;
+use bevy_ecs::prelude::*;
+use bevy_bundletree::ChildBundle;
 
-#[derive(IntoBundleTree, BundleEnum)]
-enum UiNode {
-    Node(NodeBundle),
-    Text(TextBundle),
-    Button(ButtonBundle),
-}
-fn setup(mut commands: Commands) {
-    let tree: BundleTree<UiNode> = NodeBundle::default().with_children([
-        TextBundle::default().into_tree(),
-        ButtonBundle::default().into_tree()]);
-    commands.spawn_tree(tree);
+#[derive(Component)]
+struct A;
+
+#[derive(Component)]
+struct B(u8);
+
+fn spawn_hierarchy(mut commands: Commands) {
+  commands.spawn(
+   (A, // Parent
+    ChildBundle( // This component is removed on spawn
+      (A, B(3)) // Child
+    )
+  ));
 }
 ```
 
@@ -33,6 +35,4 @@ fn setup(mut commands: Commands) {
 
 | bevy | bevy_bundletree |
 | ---- | --------------- |
-| 0.15 | 0.3.0           |  
-| 0.14 | 0.2.1           |   
-| 0.13 | 0.1.1           |   
+| 0.15 | 0.3.0           |
