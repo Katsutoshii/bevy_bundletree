@@ -198,7 +198,6 @@ impl<B: Bundle, I: IntoIterator<Item = B> + Send + Sync + 'static> Command
 #[cfg(test)]
 mod tests {
     use bevy_ecs::system::RunSystemOnce;
-    use bevy_hierarchy::Children;
 
     use super::*;
 
@@ -255,7 +254,7 @@ mod tests {
         assert_eq!(children.len(), 3);
 
         for (i, child_entity) in children.iter().enumerate() {
-            assert_eq!(world.get::<B>(*child_entity), Some(&B(i as u8)));
+            assert_eq!(world.get::<B>(child_entity), Some(&B(i as u8)));
         }
     }
 
@@ -274,7 +273,7 @@ mod tests {
         assert_eq!(children.len(), 7);
 
         for (i, child_entity) in children.iter().enumerate() {
-            assert_eq!(world.get::<B>(*child_entity), Some(&B(i as u8)));
+            assert_eq!(world.get::<B>(child_entity), Some(&B(i as u8)));
         }
     }
 

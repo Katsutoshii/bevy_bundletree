@@ -27,3 +27,6 @@ name = "ui"
 
 [features]
 bevy_dev_tools = []
+
+[workspace.lints.clippy]
+type_complexity = "allow"
