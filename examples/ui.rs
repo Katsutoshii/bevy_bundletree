@@ -5,7 +5,7 @@ use bevy::{
     a11y::AccessibilityNode,
     color::palettes::{basic::LIME, css::DARK_GRAY},
     input::mouse::{MouseScrollUnit, MouseWheel},
-    picking::focus::HoverMap,
+    picking::hover::HoverMap,
     prelude::*,
     ui::widget::NodeImageMode,
     winit::WinitSettings,
@@ -32,15 +32,15 @@ fn main() {
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Camera
-    commands.spawn((Camera2d, IsDefaultUiCamera, UiBoxShadowSamples(6)));
+    commands.spawn((Camera2d, IsDefaultUiCamera, BoxShadowSamples(6)));
 
-    let shadow = BoxShadow {
-        color: Color::BLACK.with_alpha(0.5),
-        blur_radius: Val::Px(2.),
-        x_offset: Val::Px(10.),
-        y_offset: Val::Px(10.),
-        ..default()
-    };
+    let shadow = BoxShadow::new(
+        Color::BLACK.with_alpha(0.5),
+        Val::Px(10.),
+        Val::Px(10.),
+        Val::Px(10.0),
+        Val::Px(10.0),
+    );
 
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let icon = asset_server.load("branding/icon.png");
@@ -52,7 +52,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             justify_content: JustifyContent::SpaceBetween,
             ..default()
         },
-        PickingBehavior::IGNORE,
+        Pickable::IGNORE,
         // Left vertical fill
         ChildBundle((
             Node {
@@ -144,7 +144,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             },
                             Label,
                             AccessibilityNode(Accessible::new(Role::ListItem)),
-                            PickingBehavior {
+                            Pickable {
                                 should_block_lower: false,
                                 ..default()
                             },
@@ -194,7 +194,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            PickingBehavior::IGNORE,
+            Pickable::IGNORE,
             ChildBundle((
                 Node {
                     width: Val::Px(100.0),
@@ -202,7 +202,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ..default()
                 },
                 BackgroundColor(Color::srgb(1.0, 0.0, 0.)),
-                shadow,
+                shadow.clone(),
                 ChildBundles([
                     (
                         Node {
@@ -215,7 +215,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             ..default()
                         },
                         BackgroundColor(Color::srgb(1.0, 0.3, 0.3)),
-                        shadow,
+                        shadow.clone(),
                     ),
                     (
                         Node {
@@ -227,7 +227,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             ..default()
                         },
                         BackgroundColor(Color::srgb(1.0, 0.5, 0.5)),
-                        shadow,
+                        shadow.clone(),
                     ),
                     (
                         Node {
@@ -239,7 +239,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             ..default()
                         },
                         BackgroundColor(Color::srgb(0.0, 0.7, 0.7)),
-                        shadow,
+                        shadow.clone(),
                     ),
                     // alpha test
                     (
@@ -252,10 +252,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             ..default()
                         },
                         BackgroundColor(Color::srgba(1.0, 0.9, 0.9, 0.4)),
-                        BoxShadow {
-                            color: Color::BLACK.with_alpha(0.3),
-                            ..shadow
-                        },
+                        BoxShadow { ..shadow.clone() },
                     ),
                 ]),
             )),

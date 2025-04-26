@@ -15,12 +15,11 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy_ecs = { version = "0.15", default-features = false }
-bevy_hierarchy = { version = "0.15", default-features = false }
-accesskit = { version = "0.17" }
+bevy_ecs = { version = "0.16", default-features = false }
+accesskit = { version = "0.18" }
 
 [dev-dependencies]
-bevy = { version = "0.15" }
+bevy = { version = "0.16" }
 
 [[example]]
 name = "ui"

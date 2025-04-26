@@ -1,11 +1,11 @@
 use core::marker::PhantomData;
 
+use bevy_ecs::component::Mutable;
 use bevy_ecs::{
-    component::{ComponentHooks, ComponentId, StorageType},
+    component::{ComponentHooks, HookContext, StorageType},
     prelude::*,
-    world::{Command, DeferredWorld},
+    world::DeferredWorld,
 };
-use bevy_hierarchy::BuildChildren;
 
 /// A component that, when added to an entity, will add a child entity with the given bundle.
 ///
@@ -41,7 +41,7 @@ pub struct ChildBundle<B: Bundle>(pub B);
 impl<B: Bundle> Component for ChildBundle<B> {
     /// This is a sparse set component as it's only ever added and removed, never iterated over.
     const STORAGE_TYPE: StorageType = StorageType::SparseSet;
-
+    type Mutability = Mutable;
     fn register_component_hooks(hooks: &mut ComponentHooks) {
         hooks.on_add(with_child_hook::<B>);
     }
@@ -50,14 +50,10 @@ impl<B: Bundle> Component for ChildBundle<B> {
 /// A hook that runs whenever [`ChildBundle`] is added to an entity.
 ///
 /// Generates a [`ChildBundleCommand`].
-fn with_child_hook<B: Bundle>(
-    mut world: DeferredWorld<'_>,
-    entity: Entity,
-    _component_id: ComponentId,
-) {
+fn with_child_hook<B: Bundle>(mut world: DeferredWorld<'_>, context: HookContext) {
     // Component hooks can't perform structural changes, so we need to rely on commands.
     world.commands().queue(ChildBundleCommand {
-        parent_entity: entity,
+        parent_entity: context.entity,
         _phantom: PhantomData::<B>,
     });
 }
@@ -144,6 +140,7 @@ pub struct ChildBundles<B: Bundle, I: IntoIterator<Item = B>>(pub I);
 impl<B: Bundle, I: IntoIterator<Item = B> + Send + Sync + 'static> Component
     for ChildBundles<B, I>
 {
+    type Mutability = Mutable;
     /// This is a sparse set component as it's only ever added and removed, never iterated over.
     const STORAGE_TYPE: StorageType = StorageType::SparseSet;
 
@@ -157,12 +154,11 @@ impl<B: Bundle, I: IntoIterator<Item = B> + Send + Sync + 'static> Component
 /// Generates a [`ChildBundlesCommand`].
 fn with_children_hook<B: Bundle, I: IntoIterator<Item = B> + Send + Sync + 'static>(
     mut world: DeferredWorld<'_>,
-    entity: Entity,
-    _component_id: ComponentId,
+    context: HookContext,
 ) {
     // Component hooks can't perform structural changes, so we need to rely on commands.
     world.commands().queue(ChildBundlesCommand {
-        parent_entity: entity,
+        parent_entity: context.entity,
         _phantom: PhantomData::<(B, I)>,
     });
 }
