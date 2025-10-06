@@ -1,11 +1,8 @@
 use core::marker::PhantomData;
 
 use bevy_ecs::component::Mutable;
-use bevy_ecs::{
-    component::{ComponentHooks, HookContext, StorageType},
-    prelude::*,
-    world::DeferredWorld,
-};
+use bevy_ecs::lifecycle::{ComponentHook, HookContext};
+use bevy_ecs::{component::StorageType, prelude::*, world::DeferredWorld};
 
 /// A component that, when added to an entity, will add a child entity with the given bundle.
 ///
@@ -42,8 +39,8 @@ impl<B: Bundle> Component for ChildBundle<B> {
     /// This is a sparse set component as it's only ever added and removed, never iterated over.
     const STORAGE_TYPE: StorageType = StorageType::SparseSet;
     type Mutability = Mutable;
-    fn register_component_hooks(hooks: &mut ComponentHooks) {
-        hooks.on_add(with_child_hook::<B>);
+    fn on_add() -> Option<ComponentHook> {
+        Some(with_child_hook::<B>)
     }
 }
 
@@ -144,8 +141,8 @@ impl<B: Bundle, I: IntoIterator<Item = B> + Send + Sync + 'static> Component
     /// This is a sparse set component as it's only ever added and removed, never iterated over.
     const STORAGE_TYPE: StorageType = StorageType::SparseSet;
 
-    fn register_component_hooks(hooks: &mut ComponentHooks) {
-        hooks.on_add(with_children_hook::<B, I>);
+    fn on_add() -> Option<ComponentHook> {
+        Some(with_children_hook::<B, I>)
     }
 }
 

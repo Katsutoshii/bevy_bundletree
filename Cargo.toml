@@ -1,25 +1,23 @@
 [package]
-edition = "2021"
+edition = "2024"
 name = "bevy_bundletree"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Josiah Putman <joshikatsu@gmail.com>"]
 description = "Spawn trees of bundles in the Bevy game engine."
 documentation = "https://docs.rs/bevy_bundletree/latest/bevy_bundletree"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/Katsutoshii/bevy_bundletree"
 repository = "https://github.com/Katsutoshii/bevy_bundletree"
-keywords = [
-    "bevy"
-]
+keywords = ["bevy"]
 readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy_ecs = { version = "0.16", default-features = false }
+bevy_ecs = { version = "0.17", default-features = false }
 accesskit = { version = "0.18" }
 
 [dev-dependencies]
-bevy = { version = "0.16" }
+bevy = { version = "0.17" }
 
 [[example]]
 name = "ui"
