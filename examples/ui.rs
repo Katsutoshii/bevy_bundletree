@@ -1,5 +1,5 @@
 //! This example illustrates the various features of Bevy UI.
-
+//! `cargo run --example ui`
 use bevy::{color::palettes::basic::*, prelude::*, winit::WinitSettings};
 use bevy_bundletree::ChildBundle;
 
@@ -57,7 +57,7 @@ fn setup(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(button(&assets));
 }
 
-fn button(asset_server: &AssetServer) -> impl Bundle + use<> {
+fn button(asset_server: &AssetServer) -> impl Bundle {
     (
         Node {
             width: Val::Percent(100.0),
@@ -76,10 +76,10 @@ fn button(asset_server: &AssetServer) -> impl Bundle + use<> {
                 justify_content: JustifyContent::Center,
                 // vertically center child text
                 align_items: AlignItems::Center,
+                border_radius: BorderRadius::MAX,
                 ..default()
             },
             BorderColor::from(Color::BLACK),
-            BorderRadius::MAX,
             BackgroundColor(NORMAL_BUTTON),
             ChildBundle((
                 Text::new("Button"),

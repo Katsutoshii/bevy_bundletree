@@ -35,6 +35,7 @@ fn spawn_hierarchy(mut commands: Commands) {
 
 | bevy | bevy_bundletree |
 | ---- | --------------- |
+| 0.18 | 0.18.0          |
 | 0.17 | 0.6.0           |
 | 0.16 | 0.5.0           |
 | 0.15 | 0.3.0-0.4.0     |
